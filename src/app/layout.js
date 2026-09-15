@@ -1,5 +1,13 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import Navbar from "@/components/navbar/navbar";
+import Sidebar from "@/components/sidebar/sidebar";
+import QueryProvider from "@/components/providers/query-provider";
+import { Toaster } from "react-hot-toast";
+
+// TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
+// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
+export const instant = false;
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -21,8 +29,19 @@ export default function RootLayout({ children }) {
     <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      suppressHydrationWarning="true"
+      data-lt-installed="true"
     >
-      <body className="min-h-full flex flex-col">{children}</body>
-    </html>
+    <body className="min-h-screen flex flex-col">
+    <Toaster/>
+    <QueryProvider>
+    <Navbar />
+        <div className="flex flex-1 min-h-0">
+          <Sidebar />
+          <main className="flex-1 min-w-0 p-4 overflow-auto">{children}</main>
+        </div>
+    </QueryProvider>
+   </body>
+  </html>
   );
 }
