@@ -57,7 +57,7 @@ export function CommunityMembershipButton({ communityId, joined }) {
 
 
 async function toggleMembership(communityId, isJoined) {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
   const path = isJoined
     ? `/communities/membership/leave/regular/${communityId}`
     : `/communities/membership/join/regular/${communityId}`;

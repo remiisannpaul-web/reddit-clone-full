@@ -15,7 +15,7 @@ import {
 } from 'lucide-react'
 
 async function fetchCommentLikes(commentId) {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
   const response = await fetch(`${apiUrl}/comments/likes/${commentId}`, {
     method: "GET",
@@ -35,7 +35,7 @@ async function fetchCommentLikes(commentId) {
 }
 
 async function fetchAddCommentLike(commentId, commentPostId) {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
   const response = await fetch(`${apiUrl}/comments/likes/add/${commentId}`, {
     method: "POST",
@@ -57,7 +57,7 @@ async function fetchAddCommentLike(commentId, commentPostId) {
 }
 
 async function fetchRemoveCommentLike(commentId) {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
   const response = await fetch(`${apiUrl}/comments/likes/${commentId}`, {
     method: "DELETE",

@@ -49,7 +49,7 @@ export default function RelatedPostsFeed({ userId, userRole }) {
     queryKey: ["relatedPosts", userId],
     enabled: Boolean(userId),
     queryFn: async () => {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
       const endpoint = `${apiUrl}/posts/feed`;
       let response;
 

@@ -39,7 +39,7 @@ export default function InfinitePostScroll({ communityId }) {
     queryKey: ["posts", communityId],
 
     queryFn: async ({ pageParam }) => {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
       let url = `${apiUrl}/posts/community/${communityId}`;
 
       if (pageParam) {

@@ -27,7 +27,7 @@ export default function SinglePostContent({ postId, comments, postLikes, comment
     queryKey: ["post", postId],
     enabled: Boolean(session?.user?.id && postId),
     queryFn: async () => {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
       const endpoint = `${apiUrl}/posts/${postId}`;
       const response = await fetch(endpoint, {
         method: "GET",

@@ -15,7 +15,10 @@ export async function serverApi(path, options = {}) {
   requestHeaders.set("Content-Type", "application/json");
   const cookie = incoming.get("cookie");
   if (cookie) requestHeaders.set("Cookie", cookie);
-  const baseUrl = process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
+  const baseUrl =
+    process.env.API_URL ??
+    process.env.NEXT_PUBLIC_API_URL ??
+    "http://localhost:4000";
   const response = await fetch(`${baseUrl.replace(/\/$/, "")}${path}`, {
     ...options,
     headers: requestHeaders,
@@ -23,7 +26,10 @@ export async function serverApi(path, options = {}) {
   });
   const data = await response.json().catch(() => null);
   if (!response.ok || data?.success === false) {
-    throw new ApiError(data?.message ?? data?.error ?? `API request failed (${response.status})`, response.status);
+    throw new ApiError(
+      data?.message ?? data?.error ?? `API request failed (${response.status})`,
+      response.status,
+    );
   }
   return data;
 }

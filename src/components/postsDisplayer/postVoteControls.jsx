@@ -9,7 +9,7 @@ async function fetchLike(postId, communityId, action) {
     throw new Error("Invalid post vote request.");
   }
 
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
   const url = action === "add"
     ? `${apiUrl}/posts/likes/add/${postId}/${communityId}`
     : `${apiUrl}/posts/likes/remove/${postId}`;
