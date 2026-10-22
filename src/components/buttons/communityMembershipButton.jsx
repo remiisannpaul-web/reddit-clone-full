@@ -2,6 +2,7 @@
 
 import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { useState } from "react";
+import { API_BASE_URL } from "@/lib/api-url";
 
 
 
@@ -57,11 +58,10 @@ export function CommunityMembershipButton({ communityId, joined }) {
 
 
 async function toggleMembership(communityId, isJoined) {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
   const path = isJoined
     ? `/communities/membership/leave/regular/${communityId}`
     : `/communities/membership/join/regular/${communityId}`;
-  const url = `${apiUrl}${path}`;
+  const url = `${API_BASE_URL}${path}`;
 
   try {
     const response = await fetch(url, {
@@ -93,7 +93,7 @@ async function toggleMembership(communityId, isJoined) {
   } catch (error) {
     if (error instanceof TypeError) {
       throw new Error(
-        `Could not reach the API at ${url}. Make sure the Nest server is running on ${apiUrl}.`,
+        `Could not reach the API at ${url}. Make sure the API gateway is running.`,
       );
     }
 

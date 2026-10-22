@@ -1,14 +1,14 @@
 {
   "$schema": "https://json.schemastore.org/nest-cli",
   "collection": "@nestjs/schematics",
-  "sourceRoot": "apps/project-name/src",
+  "sourceRoot": "apps/api-gateway/src",
   "compilerOptions": {
     "deleteOutDir": true,
     "webpack": true,
-    "tsConfigPath": "apps/project-name/tsconfig.app.json"
+    "tsConfigPath": "apps/api-gateway/tsconfig.app.json"
   },
   "monorepo": true,
-  "root": "apps/project-name",
+  "root": "apps/api-gateway",
   "projects": {
     "api-gateway": {
       "type": "application",
@@ -19,13 +19,40 @@
         "tsConfigPath": "apps/api-gateway/tsconfig.app.json"
       }
     },
-    "project-name": {
+    "community-service": {
       "type": "application",
-      "root": "apps/project-name",
+      "root": "apps/community-service",
       "entryFile": "main",
-      "sourceRoot": "apps/project-name/src",
+      "sourceRoot": "apps/community-service/src",
       "compilerOptions": {
-        "tsConfigPath": "apps/project-name/tsconfig.app.json"
+        "tsConfigPath": "apps/community-service/tsconfig.app.json"
+      }
+    },
+    "content-service": {
+      "type": "application",
+      "root": "apps/content-service",
+      "entryFile": "main",
+      "sourceRoot": "apps/content-service/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/content-service/tsconfig.app.json"
+      }
+    },
+    "reputation-worker": {
+      "type": "application",
+      "root": "apps/reputation-worker",
+      "entryFile": "main",
+      "sourceRoot": "apps/reputation-worker/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/reputation-worker/tsconfig.app.json"
+      }
+    },
+    "outbox-worker": {
+      "type": "application",
+      "root": "apps/outbox-worker",
+      "entryFile": "main",
+      "sourceRoot": "apps/outbox-worker/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/outbox-worker/tsconfig.app.json"
       }
     }
   }

@@ -3,13 +3,14 @@
 import { Plus } from "lucide-react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
+import { API_BASE_URL } from "@/lib/api-url";
 
 export default function Communities() {
   
   const { data: communities, isLoading, isError, } = useQuery({
     queryKey: ["communities"],
     queryFn: async () => { 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000"}/communities`, {
+      const response = await fetch(`${API_BASE_URL}/communities`, {
       method: "GET",
       headers: { "Content-Type": "application/json" },
     })

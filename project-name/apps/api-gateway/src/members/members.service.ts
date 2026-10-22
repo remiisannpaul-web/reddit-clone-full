@@ -6,7 +6,7 @@ import type { AuthenticatedRequest } from '../../../../auth.guard';
 @Injectable()
 export class MembersClient {
   private readonly baseUrl =
-    process.env.COMMUNITY_MEMBERS_SERVICE_URL ?? 'http://localhost:3004';
+    process.env.COMMUNITY_SERVICE_URL ?? 'http://localhost:3003';
 
   constructor(private readonly http: HttpService) {}
 

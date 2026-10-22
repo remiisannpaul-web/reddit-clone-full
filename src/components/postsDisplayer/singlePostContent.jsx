@@ -12,6 +12,7 @@ import {
 import Link from "next/link";
 import CommentComposer from "@/components/comments/commentComposer";
 import PostVoteControls from "@/components/postsDisplayer/postVoteControls";
+import { API_BASE_URL } from "@/lib/api-url";
 import { useSession } from "@/lib/auth-client";
 
 export default function SinglePostContent({ postId, comments, postLikes, commentsContent }) {
@@ -27,8 +28,7 @@ export default function SinglePostContent({ postId, comments, postLikes, comment
     queryKey: ["post", postId],
     enabled: Boolean(session?.user?.id && postId),
     queryFn: async () => {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
-      const endpoint = `${apiUrl}/posts/${postId}`;
+      const endpoint = `${API_BASE_URL}/posts/${postId}`;
       const response = await fetch(endpoint, {
         method: "GET",
         credentials: "include",

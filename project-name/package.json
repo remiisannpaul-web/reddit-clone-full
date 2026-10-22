@@ -10,14 +10,20 @@
     "format": "prettier --write \"{apps,lib,nest}/**/*.ts\" \"auth.guard.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
+    "start:community": "nest start community-service",
+    "start:community:dev": "nest start community-service --watch",
+    "start:content": "nest start content-service",
+    "start:content:dev": "nest start content-service --watch",
     "start:debug": "nest start --debug --watch",
-    "start:prod": "node dist/apps/project-name/main.js",
+    "start:community:prod": "node dist/apps/community-service/main.js",
+    "start:content:prod": "node dist/apps/content-service/main.js",
+    "start:prod": "node dist/apps/api-gateway/main.js",
     "lint": "eslint \"{apps,lib,nest}/**/*.ts\" \"auth.guard.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./apps/project-name/test/jest-e2e.json",
+    "test:e2e": "jest --config ./apps/api-gateway/test/jest-e2e.json",
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
@@ -78,7 +84,10 @@
       "^.+\\.(t|j)s$": "ts-jest"
     },
     "collectCoverageFrom": [
-      "**/*.(t|j)s"
+      "apps/**/*.ts",
+      "lib/**/*.ts",
+      "!**/*.spec.ts",
+      "!**/test/**"
     ],
     "coverageDirectory": "coverage",
     "testEnvironment": "node",
@@ -90,7 +99,7 @@
       "/dist/"
     ],
     "setupFilesAfterEnv": [
-      "<rootDir>/apps/project-name/test/setup.ts"
+      "<rootDir>/test/setup.ts"
     ],
     "roots": [
       "<rootDir>"

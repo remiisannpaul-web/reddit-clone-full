@@ -3,13 +3,11 @@
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import toast from "react-hot-toast";
+import { API_BASE_URL } from "@/lib/api-url";
 
 async function createPost({ communityId, title, content }) {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
-
-
   try {
-    const response = await fetch(`${apiUrl}/posts/create/${communityId}`, {
+    const response = await fetch(`${API_BASE_URL}/posts/create/${communityId}`, {
     method: "POST",
     credentials: "include",
     headers: { "Content-Type": "application/json" },
@@ -39,7 +37,7 @@ async function createPost({ communityId, title, content }) {
   } catch (error) {
     if (error instanceof TypeError) {
       throw new Error(
-        `Could not reach the API at ${apiUrl}. Make sure the Nest server is running on ${apiUrl}.`,
+        `Could not reach the API at ${API_BASE_URL}. Make sure the API gateway is running.`,
       );
     }
 

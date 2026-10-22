@@ -1,8 +1,8 @@
-import { CommunityMembersModule } from '../../community-members/src/community-members.module';
 import { Module } from '@nestjs/common';
 import { PostServiceService } from './post-service.service';
 import { PostServiceController } from './post-service.controller';
-import { BansModule } from '../../bans-service/src/bans.module';
+import { BansCoreModule } from '../../bans-service/src/bans-core.module';
+import { CommunityMembersCoreModule } from '../../community-members/src/community-members-core.module';
 import { PostRepository } from './repositories/post.repository';
 import { RateLimitModule } from '../../rate-limit/src/rate-limit.module';
 import { RedisServiceModule } from '../../redis-service/src/redis-service.module';
@@ -11,10 +11,10 @@ import { NestModule, MiddlewareConsumer } from '@nestjs/common';
 
 @Module({
   imports: [
-    BansModule,
+    BansCoreModule,
     RateLimitModule,
     RedisServiceModule,
-    CommunityMembersModule,
+    CommunityMembersCoreModule,
   ],
   controllers: [PostServiceController],
   providers: [PostServiceService, PostRepository],

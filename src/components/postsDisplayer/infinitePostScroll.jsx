@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import PostVoteControls from "@/components/postsDisplayer/postVoteControls";
 import { Award, MessageCircle, Share2 } from "lucide-react";
+import { API_BASE_URL } from "@/lib/api-url";
 
 function formatTimeAgo(dateString) {
   const date = new Date(dateString);
@@ -39,8 +40,7 @@ export default function InfinitePostScroll({ communityId }) {
     queryKey: ["posts", communityId],
 
     queryFn: async ({ pageParam }) => {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
-      let url = `${apiUrl}/posts/community/${communityId}`;
+      let url = `${API_BASE_URL}/posts/community/${communityId}`;
 
       if (pageParam) {
         url += `?cursorCreatedAt=${pageParam.createdAt}&cursorId=${pageParam.id}`;

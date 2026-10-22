@@ -30,16 +30,15 @@ describe('PostServiceController', () => {
   });
 
   it('should update a post via patch', async () => {
-    const updateSpy = jest.spyOn(service as any, 'updatePost');
     const result = { success: true, message: 'Post updated' };
-    updateSpy.mockResolvedValue(result);
+    jest.spyOn(service, 'updatePost').mockResolvedValue(result);
 
     await expect(
       controller.update('post-123', { title: 'Updated title' }, {
         user: { id: 'author' },
       } as AuthenticatedRequest),
     ).resolves.toEqual(result);
-    expect(updateSpy).toHaveBeenCalledWith(
+    expect(service.updatePost).toHaveBeenCalledWith(
       'post-123',
       { title: 'Updated title' },
       'author',

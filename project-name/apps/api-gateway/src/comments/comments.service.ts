@@ -6,7 +6,7 @@ import type { AuthenticatedRequest } from '../../../../auth.guard';
 @Injectable()
 export class CommentsClient {
   private readonly baseUrl =
-    process.env.COMMENTS_SERVICE_URL ?? 'http://localhost:3002';
+    process.env.CONTENT_SERVICE_URL ?? 'http://localhost:3005';
 
   constructor(private readonly http: HttpService) {}
 
@@ -24,7 +24,11 @@ export class CommentsClient {
     ).then(({ data }) => data);
   }
 
-  create(postId: string, body: { content: unknown }, req: AuthenticatedRequest) {
+  create(
+    postId: string,
+    body: { content: unknown },
+    req: AuthenticatedRequest,
+  ) {
     return firstValueFrom(
       this.http.post(
         `${this.baseUrl}/comments/post/${postId}`,

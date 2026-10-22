@@ -7,9 +7,18 @@ import { CommunitiesModule } from './communities/communities.module';
 import { MembersModule } from './members/members.module';
 import { PostsModule } from './posts/posts.module';
 import { UsersModule } from './users/users.module';
+import { AuthProxyModule } from './auth/auth-proxy.module';
 
 @Module({
-  imports: [UsersModule, CommunitiesModule, PostsModule, CommentsModule, MembersModule, BansModule],
+  imports: [
+    AuthProxyModule,
+    UsersModule,
+    CommunitiesModule,
+    PostsModule,
+    CommentsModule,
+    MembersModule,
+    BansModule,
+  ],
   controllers: [ApiGatewayController],
   providers: [ApiGatewayService],
 })

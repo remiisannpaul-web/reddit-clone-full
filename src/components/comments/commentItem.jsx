@@ -3,6 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { deleteComment } from "@/app/actions/comment";
+import { API_BASE_URL } from "@/lib/api-url";
 import {
   ArrowBigDown,
   ArrowBigUp,
@@ -15,9 +16,7 @@ import {
 } from 'lucide-react'
 
 async function fetchCommentLikes(commentId) {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
-
-  const response = await fetch(`${apiUrl}/comments/likes/${commentId}`, {
+  const response = await fetch(`${API_BASE_URL}/comments/likes/${commentId}`, {
     method: "GET",
     headers: { "Content-Type": "application/json" },
   });
@@ -35,9 +34,7 @@ async function fetchCommentLikes(commentId) {
 }
 
 async function fetchAddCommentLike(commentId, commentPostId) {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
-
-  const response = await fetch(`${apiUrl}/comments/likes/add/${commentId}`, {
+  const response = await fetch(`${API_BASE_URL}/comments/likes/add/${commentId}`, {
     method: "POST",
     credentials: "include",
     headers: { "Content-Type": "application/json" },
@@ -57,9 +54,7 @@ async function fetchAddCommentLike(commentId, commentPostId) {
 }
 
 async function fetchRemoveCommentLike(commentId) {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
-
-  const response = await fetch(`${apiUrl}/comments/likes/${commentId}`, {
+  const response = await fetch(`${API_BASE_URL}/comments/likes/${commentId}`, {
     method: "DELETE",
     credentials: "include",
     headers: { "Content-Type": "application/json" },

@@ -1,5 +1,6 @@
 import "server-only";
 import { headers } from "next/headers";
+import { API_BASE_URL } from "@/lib/api-url";
 
 export class ApiError extends Error {
   constructor(message, status) {
@@ -15,11 +16,7 @@ export async function serverApi(path, options = {}) {
   requestHeaders.set("Content-Type", "application/json");
   const cookie = incoming.get("cookie");
   if (cookie) requestHeaders.set("Cookie", cookie);
-  const baseUrl =
-    process.env.API_URL ??
-    process.env.NEXT_PUBLIC_API_URL ??
-    "http://localhost:4000";
-  const response = await fetch(`${baseUrl.replace(/\/$/, "")}${path}`, {
+  const response = await fetch(`${API_BASE_URL.replace(/\/$/, "")}${path}`, {
     ...options,
     headers: requestHeaders,
     cache: "no-store",

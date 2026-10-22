@@ -1,12 +1,10 @@
 import { Module } from '@nestjs/common';
-import { BansService } from './bans.service';
+import { BansCoreModule } from './bans-core.module';
 import { BansController } from './bans.controller';
-import { CommunityMembersModule } from '../../community-members/src/community-members.module';
+import { CommunityMembersCoreModule } from '../../community-members/src/community-members-core.module';
 
 @Module({
-  imports: [CommunityMembersModule],
+  imports: [BansCoreModule, CommunityMembersCoreModule],
   controllers: [BansController],
-  providers: [BansService],
-  exports: [BansService],
 })
 export class BansModule {}

@@ -4,11 +4,10 @@ import { useMutation } from "@tanstack/react-query";
 import { PenLine } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
+import { API_BASE_URL } from "@/lib/api-url";
 
 async function patchUser({ userId, path = "", body }) {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
-
-  const response = await fetch(`${apiUrl}/users/${userId}${path}`, {
+  const response = await fetch(`${API_BASE_URL}/users/${userId}${path}`, {
     method: "PATCH",
     credentials: "include",
     headers: { "Content-Type": "application/json" },

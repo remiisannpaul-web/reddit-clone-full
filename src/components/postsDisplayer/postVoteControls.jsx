@@ -3,16 +3,16 @@
 import { ArrowBigDown, ArrowBigUp } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
+import { API_BASE_URL } from "@/lib/api-url";
 
 async function fetchLike(postId, communityId, action) {
   if (!postId || !communityId || !["add", "remove"].includes(action)) {
     throw new Error("Invalid post vote request.");
   }
 
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
   const url = action === "add"
-    ? `${apiUrl}/posts/likes/add/${postId}/${communityId}`
-    : `${apiUrl}/posts/likes/remove/${postId}`;
+    ? `${API_BASE_URL}/posts/likes/add/${postId}/${communityId}`
+    : `${API_BASE_URL}/posts/likes/remove/${postId}`;
 
   try {
     const response = await fetch(url, {
@@ -46,7 +46,7 @@ async function fetchLike(postId, communityId, action) {
   } catch (error) {
     if (error instanceof TypeError) {
       throw new Error(
-        `Could not reach the API at ${apiUrl}. Make sure the Nest server is running.`,
+        `Could not reach the API at ${API_BASE_URL}. Make sure the API gateway is running.`,
       );
     }
 

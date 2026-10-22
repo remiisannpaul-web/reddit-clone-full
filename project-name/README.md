@@ -1,10 +1,9 @@
-# Reddit HTTP API
+# Reddit Nest applications
 
-This backend runs as a single Nest application at `http://localhost:3001`.
-Feature modules call each other directly through dependency injection. The
-existing HTTP routes, authentication, DTOs, repositories, PostgreSQL access,
-and Redis helpers remain available as a starting point for a future split
-into HTTP services.
+This Nest workspace runs an API gateway and two domain applications:
+`community-service` and `content-service`. Community and content features are
+grouped into those applications, with user/profile endpoints included in the
+content application. The gateway is the default Nest project.
 
 ## Development
 
@@ -15,36 +14,68 @@ npm ci --prefix project-name
 npm --prefix project-name run start:dev
 ```
 
-Run the Next.js frontend separately with `npm run dev`. Use the same hostname
-for the frontend and backend so session cookies work.
+Start the gateway and the two domain applications in separate terminals:
+
+```sh
+npm --prefix project-name run start:dev
+npm --prefix project-name run start:community:dev
+npm --prefix project-name run start:content:dev
+```
+
+Run the Next.js frontend separately with `npm run dev`.
+
+The API gateway listens on port `4000` by default. Set
+`NEXT_PUBLIC_API_URL=http://localhost:4000` in the frontend's `.env.local` to
+route browser and server-side API requests, including Better Auth, through the
+gateway. The gateway forwards Better Auth requests to the Next.js auth route;
+set `NEXT_AUTH_URL` to the internal Next.js origin when it is not
+`http://localhost:3000`. Configure `API_GATEWAY_PORT` to change the gateway
+port. The community and content applications default to ports `3003` and
+`3005`; configure `COMMUNITY_SERVICE_PORT`,
+`CONTENT_SERVICE_PORT`, `COMMUNITY_SERVICE_URL`, and `CONTENT_SERVICE_URL` when
+those defaults do not fit your environment.
 
 ## Structure
 
-- `apps/project-name/src/`: application module, HTTP bootstrap, CORS, and input validation.
-- `apps/<service>/src/`: feature controllers, local services, DTOs, repositories,
-  and unit tests for posts, comments, communities, membership, bans, users,
-  rate limiting, and Redis.
-- `apps/api-gateway/`: separate gateway scaffold for future development.
+- `apps/api-gateway/src/`: gateway HTTP bootstrap and API proxy controllers.
+- `apps/community-service/src/`: bootstrap that composes the communities,
+  membership, and bans feature modules.
+- `apps/content-service/src/`: bootstrap that composes posts, comments,
+  profiles, rate limiting, and Redis-backed view-count modules.
+- `apps/communities-service/`, `apps/community-members/`, `apps/bans-service/`,
+  `apps/post-service/`, `apps/comments-service/`, and `apps/user-service/`:
+  feature modules and their tests; these are no longer independent Nest apps.
 - `lib/`: shared authentication, database, Redis, environment, and request helpers.
-- `apps/project-name/test/`: HTTP integration tests with mocked PostgreSQL, Redis, and sessions.
+
+The gateway forwards community, member, and ban routes to `community-service`;
+post, comment, and profile routes go to `content-service`. Rate limiting and
+Redis view counts are shared infrastructure modules used by the content app,
+not standalone applications. `reputation-worker` and `outbox-worker` remain
+configuration placeholders only.
 
 ## Configuration
 
-The backend reads `project-name/.env.local`, then `project-name/.env`, then the
-root `.env.local`. Existing process environment variables take precedence.
+Both domain applications currently use the shared `DATABASE_URL` and
+`REDIS_URL` from the backend package environment configuration. This setup
+allows regular SQL joins and transactions across the grouped features, but it
+is still one shared database, not one database per domain. Existing process
+environment variables take precedence over values loaded from env files.
 
 ```dotenv
 DATABASE_URL=postgresql://USER:PASSWORD@localhost:5432/reddit
 BETTER_AUTH_SECRET=YOUR_EXISTING_SHARED_SECRET
 BETTER_AUTH_URL=http://localhost:3000
 REDIS_URL=redis://localhost:6379
-API_PORT=3001
+COMMUNITY_SERVICE_PORT=3003
+CONTENT_SERVICE_PORT=3005
+COMMUNITY_SERVICE_URL=http://localhost:3003
+CONTENT_SERVICE_URL=http://localhost:3005
+API_GATEWAY_PORT=4000
 FRONTEND_URL=http://localhost:3000
 ```
 
-The frontend uses `NEXT_PUBLIC_API_URL=http://localhost:3001` and
-`API_URL=http://localhost:3001`. Keep the existing Google, GitHub, Resend, and
-UploadThing settings. Authentication and upload routes remain in Next.js.
+Keep the existing Google, GitHub, Resend, and UploadThing settings. Better Auth
+is implemented by the Next.js route and reached through the API gateway proxy.
 
 ## Checks and production
 
@@ -53,8 +84,51 @@ npm --prefix project-name run build
 npm --prefix project-name run typecheck
 npm --prefix project-name test -- --runInBand
 npm --prefix project-name run test:e2e -- --runInBand
+npm --prefix project-name run test:cov -- --runInBand
 npm --prefix project-name run start:prod
 ```
 
-The production entry point is `project-name/dist/apps/project-name/main.js`. Deploy the compiled
-`dist` tree with the backend package manifest and production dependencies.
+## Testing
+
+Tests live beside the application code in each app's `src/` directory:
+
+- `*.service.spec.ts` tests service business rules. Repository, database,
+  Redis, and neighboring-service dependencies are mocked so the test stays
+  isolated and does not need running infrastructure.
+- `*.controller.spec.ts` tests that HTTP controller methods pass route/body
+  values and the authenticated user to the right service method. Calling a
+  controller method directly does not execute Nest guards or pipes.
+- `apps/api-gateway/test/app.e2e-spec.ts` starts a Nest HTTP app and calls its
+  root route with Supertest. The auth and outbound HTTP modules are mocked so
+  this smoke test doesn't require Better Auth or the downstream apps.
+- `test/setup.ts` applies the common Better Auth mock to unit tests to avoid
+  loading its ESM runtime during unrelated tests.
+
+Run all unit tests, one spec, the HTTP smoke test, or coverage from the
+repository root:
+
+```sh
+npm --prefix project-name test -- --runInBand
+npm --prefix project-name test -- --runInBand apps/post-service/src/post-service.service.spec.ts
+npm --prefix project-name run test:e2e -- --runInBand
+npm --prefix project-name run test:cov -- --runInBand
+```
+
+Use `npm --prefix project-name run test:watch` while iterating. A unit spec
+arranges mock return values, invokes one service/controller behavior, then
+asserts the result and dependency calls; this keeps the test deterministic and
+fast without a real database or Redis server.
+
+Build all three applications with:
+
+```sh
+cd project-name
+npx nest build api-gateway
+npx nest build community-service
+npx nest build content-service
+```
+
+Production entry points are in `dist/apps/api-gateway`, `dist/apps/community-service`,
+and `dist/apps/content-service`. Start the gateway with the package's `start:prod` script; start the domain apps
+with `npm --prefix project-name run start:community:prod` and
+`npm --prefix project-name run start:content:prod`.

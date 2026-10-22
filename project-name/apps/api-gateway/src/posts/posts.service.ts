@@ -1,11 +1,15 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
-import type { AuthenticatedRequest, SessionRequest } from '../../../../auth.guard';
+import type {
+  AuthenticatedRequest,
+  SessionRequest,
+} from '../../../../auth.guard';
 
 @Injectable()
 export class PostsClient {
-  private readonly baseUrl = process.env.POST_SERVICE_URL ?? 'http://localhost:3005';
+  private readonly baseUrl =
+    process.env.CONTENT_SERVICE_URL ?? 'http://localhost:3005';
 
   constructor(private readonly http: HttpService) {}
 
@@ -31,9 +35,9 @@ export class PostsClient {
     if (cursorId) params.set('cursorId', cursorId);
     const query = params.toString();
     const url = `${this.baseUrl}/posts/community/${communityId}${query ? `?${query}` : ''}`;
-    return firstValueFrom(
-      this.http.get(url, this.sessionHeaders(req)),
-    ).then(({ data }) => data);
+    return firstValueFrom(this.http.get(url, this.sessionHeaders(req))).then(
+      ({ data }) => data,
+    );
   }
 
   getSpecificPosts(communityId: string, req?: SessionRequest) {
@@ -53,7 +57,11 @@ export class PostsClient {
 
   update(id: string, body: Record<string, unknown>, req: AuthenticatedRequest) {
     return firstValueFrom(
-      this.http.patch(`${this.baseUrl}/posts/${id}`, body, this.sessionHeaders(req)),
+      this.http.patch(
+        `${this.baseUrl}/posts/${id}`,
+        body,
+        this.sessionHeaders(req),
+      ),
     ).then(({ data }) => data);
   }
 
@@ -73,7 +81,10 @@ export class PostsClient {
 
   countLikes(id: string, req: AuthenticatedRequest) {
     return firstValueFrom(
-      this.http.get(`${this.baseUrl}/posts/${id}/likes`, this.sessionHeaders(req)),
+      this.http.get(
+        `${this.baseUrl}/posts/${id}/likes`,
+        this.sessionHeaders(req),
+      ),
     ).then(({ data }) => data);
   }
 
@@ -104,13 +115,20 @@ export class PostsClient {
 
   pin(id: string, req: AuthenticatedRequest) {
     return firstValueFrom(
-      this.http.patch(`${this.baseUrl}/posts/${id}/pin`, undefined, this.sessionHeaders(req)),
+      this.http.patch(
+        `${this.baseUrl}/posts/${id}/pin`,
+        undefined,
+        this.sessionHeaders(req),
+      ),
     ).then(({ data }) => data);
   }
 
   unpin(id: string, req: AuthenticatedRequest) {
     return firstValueFrom(
-      this.http.delete(`${this.baseUrl}/posts/${id}/pin`, this.sessionHeaders(req)),
+      this.http.delete(
+        `${this.baseUrl}/posts/${id}/pin`,
+        this.sessionHeaders(req),
+      ),
     ).then(({ data }) => data);
   }
 }

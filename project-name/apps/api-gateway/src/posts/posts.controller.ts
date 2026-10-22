@@ -33,9 +33,9 @@ export class PostsController {
   @UseGuards(OptionalAuthGuard)
   getCommunityPosts(
     @Param('communityId', ParseUUIDPipe) communityId: string,
+    @Req() req: SessionRequest,
     @Query('cursorCreatedAt') cursorCreatedAt?: string,
     @Query('cursorId') cursorId?: string,
-    @Req() req: SessionRequest,
   ) {
     return this.postsClient.getCommunityPosts(
       communityId,

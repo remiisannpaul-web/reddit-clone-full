@@ -1,12 +1,15 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
-import type { SessionRequest, AuthenticatedRequest } from '../../../../auth.guard';
+import type {
+  SessionRequest,
+  AuthenticatedRequest,
+} from '../../../../auth.guard';
 
 @Injectable()
 export class CommunitiesClient {
   private readonly baseUrl =
-    process.env.COMMUNITIES_SERVICE_URL ?? 'http://localhost:3003';
+    process.env.COMMUNITY_SERVICE_URL ?? 'http://localhost:3003';
 
   constructor(private readonly http: HttpService) {}
 
@@ -15,9 +18,17 @@ export class CommunitiesClient {
     return cookie ? { headers: { Cookie: cookie } } : {};
   }
 
-  create(userId: string, body: Record<string, unknown>, req: AuthenticatedRequest) {
+  create(
+    userId: string,
+    body: Record<string, unknown>,
+    req: AuthenticatedRequest,
+  ) {
     return firstValueFrom(
-      this.http.post(`${this.baseUrl}/communities`, body, this.sessionHeaders(req)),
+      this.http.post(
+        `${this.baseUrl}/communities`,
+        body,
+        this.sessionHeaders(req),
+      ),
     ).then(({ data }) => data);
   }
 
@@ -29,7 +40,10 @@ export class CommunitiesClient {
 
   findOne(id: string, req?: SessionRequest) {
     return firstValueFrom(
-      this.http.get(`${this.baseUrl}/communities/${id}`, this.sessionHeaders(req)),
+      this.http.get(
+        `${this.baseUrl}/communities/${id}`,
+        this.sessionHeaders(req),
+      ),
     ).then(({ data }) => data);
   }
 

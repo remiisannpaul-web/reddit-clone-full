@@ -5,7 +5,8 @@ import type { AuthenticatedRequest } from '../../../../auth.guard';
 
 @Injectable()
 export class BansClient {
-  private readonly baseUrl = process.env.BANS_SERVICE_URL ?? 'http://localhost:3009';
+  private readonly baseUrl =
+    process.env.COMMUNITY_SERVICE_URL ?? 'http://localhost:3003';
 
   constructor(private readonly http: HttpService) {}
 

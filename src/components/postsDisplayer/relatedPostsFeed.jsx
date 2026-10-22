@@ -13,6 +13,7 @@ import Link from "next/link";
 import { deletePostAdmin, pinPost, unpinPost } from "@/app/actions/posts";
 import PostVoteControls from "@/components/postsDisplayer/postVoteControls";
 import { useSession } from "@/lib/auth-client";
+import { API_BASE_URL } from "@/lib/api-url";
 
 
 function formatTimeAgo(dateString) {
@@ -49,8 +50,7 @@ export default function RelatedPostsFeed({ userId, userRole }) {
     queryKey: ["relatedPosts", userId],
     enabled: Boolean(userId),
     queryFn: async () => {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
-      const endpoint = `${apiUrl}/posts/feed`;
+      const endpoint = `${API_BASE_URL}/posts/feed`;
       let response;
 
       try {
