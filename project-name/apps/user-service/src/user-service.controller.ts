@@ -1,7 +1,9 @@
-import { Body, Controller, Get, Param, Patch } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, UseGuards } from '@nestjs/common';
 import { UserServiceService } from './user-service.service';
-
+import { AuthGuard, type AuthenticatedRequest } from '@/auth.guard';
+import { ForbiddenException } from '@nestjs/common';
 @Controller('users')
+@UseGuards(AuthGuard)
 export class UserServiceController {
   constructor(private readonly users: UserServiceService) {}
 
@@ -14,9 +16,10 @@ export class UserServiceController {
   updateUser(
     @Param('id') id: string,
     @Body() body: { newName: string; userId: string },
+    @Req() req: AuthenticatedRequest,
   ) {
-    if (body.userId !== id) {
-      return { success: false, message: 'User ID mismatch' };
+    if (req.user.id !== id) {
+      throw new ForbiddenException('You are not authorized');
     }
     return this.users.modifyName(body.newName, body.userId);
   }
@@ -24,10 +27,11 @@ export class UserServiceController {
   @Patch(':id/display-name')
   updateDisplayName(
     @Param('id') id: string,
+    @Req() req: AuthenticatedRequest,
     @Body() body: { newDisplayName: string; userId: string },
   ) {
-    if (body.userId !== id) {
-      return { success: false, message: 'User ID mismatch' };
+    if (req.user.id !== id) {
+      throw new ForbiddenException('You are not authorized');
     }
     return this.users.modifyDisplayName(body.newDisplayName, body.userId);
   }
