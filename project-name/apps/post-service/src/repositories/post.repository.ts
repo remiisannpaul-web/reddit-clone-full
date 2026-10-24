@@ -1,5 +1,8 @@
-import { Injectable } from '@nestjs/common';
-import { db } from '../../../../lib/db';
+import { Inject, Injectable } from '@nestjs/common';
+import {
+  DATABASE_POOL,
+  type DatabasePool,
+} from '../../../../lib/database/database.module';
 
 type PostUpdateFields = {
   title?: string;
@@ -29,8 +32,10 @@ const PAGE_SIZE = 25;
 
 @Injectable()
 export class PostRepository {
+  constructor(@Inject(DATABASE_POOL) private readonly db: DatabasePool) {}
+
   async getSpecificPosts(communityId: string, userId: string | null) {
-    const request = await db.query(
+    const request = await this.db.query(
       `
       SELECT
         p.id::text AS id,
@@ -66,7 +71,7 @@ export class PostRepository {
   }
 
   async countLikes(postId: string) {
-    const result = await db.query(
+    const result = await this.db.query(
       'SELECT COUNT(*)::int AS count FROM post_likes WHERE post_id = $1',
       [postId],
     );
@@ -79,14 +84,14 @@ export class PostRepository {
     action: 'delete' | 'pin' | 'unpin',
   ) {
     if (action === 'delete') {
-      await db.query('DELETE FROM posts WHERE id = $1', [postId]);
+      await this.db.query('DELETE FROM posts WHERE id = $1', [postId]);
     } else if (action === 'unpin') {
-      await db.query(
+      await this.db.query(
         'UPDATE posts SET is_pinned = false, pinned_position = NULL WHERE id = $1',
         [postId],
       );
     } else {
-      await db.query(
+      await this.db.query(
         `UPDATE posts SET is_pinned = true,
         pinned_position = (SELECT COALESCE(MAX(pinned_position), 0) + 1 FROM posts WHERE community_id = $2 AND is_pinned = true)
         WHERE id = $1`,
@@ -135,7 +140,7 @@ export class PostRepository {
       ? [communityId, userId, Number(cursorCreatedAt), cursorId, PAGE_SIZE + 1]
       : [communityId, userId, PAGE_SIZE + 1];
 
-    const { rows } = await db.query<CommunityPost>(query, values);
+    const { rows } = await this.db.query<CommunityPost>(query, values);
     const posts = rows.slice(0, PAGE_SIZE);
     const lastPost = posts.at(-1);
 
@@ -149,7 +154,7 @@ export class PostRepository {
   }
 
   async getAllRelatedPosts(userId: string) {
-    const result = await db.query(
+    const result = await this.db.query(
       `
         SELECT
           posts.id::text AS id,
@@ -189,7 +194,7 @@ export class PostRepository {
   }
 
   async findPostCommunityId(postId: string): Promise<string | undefined> {
-    const result = await db.query<{ community_id: string }>(
+    const result = await this.db.query<{ community_id: string }>(
       'SELECT community_id FROM posts WHERE id = $1',
       [postId],
     );
@@ -212,7 +217,7 @@ export class PostRepository {
     }
 
     values.push(postId);
-    const result = await db.query(
+    const result = await this.db.query(
       `
         UPDATE posts
         SET ${updateFields.join(', ')}
@@ -225,7 +230,7 @@ export class PostRepository {
   }
 
   async getOnePost(postId: string, userId: string) {
-    const result = await db.query(
+    const result = await this.db.query(
       `
         SELECT
           p.id::text AS id,
@@ -258,7 +263,7 @@ export class PostRepository {
     title: string,
     content: string,
   ) {
-    const client = await db.connect();
+    const client = await this.db.connect();
 
     try {
       await client.query('BEGIN');
@@ -287,7 +292,7 @@ export class PostRepository {
   }
 
   async addLike(userId: string, postId: string): Promise<number> {
-    const result = await db.query(
+    const result = await this.db.query(
       `
         INSERT INTO post_likes (user_id, post_id)
         VALUES ($1, $2)
@@ -300,7 +305,7 @@ export class PostRepository {
   }
 
   async removeLike(userId: string, postId: string): Promise<number> {
-    const result = await db.query(
+    const result = await this.db.query(
       `
         DELETE FROM post_likes
         WHERE user_id = $1 AND post_id = $2

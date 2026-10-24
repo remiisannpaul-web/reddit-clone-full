@@ -1,5 +1,8 @@
-import { Injectable } from '@nestjs/common';
-import { db } from '../../../../lib/db';
+import { Inject, Injectable } from '@nestjs/common';
+import {
+  DATABASE_POOL,
+  type DatabasePool,
+} from '../../../../lib/database/database.module';
 
 type Community = {
   id: string;
@@ -10,6 +13,8 @@ type Community = {
 
 @Injectable()
 export class CommunitiesRepository {
+  constructor(@Inject(DATABASE_POOL) private readonly db: DatabasePool) {}
+
   async create(
     userId: string,
     name: string,
@@ -17,7 +22,7 @@ export class CommunitiesRepository {
     bannerUrl: string | null,
     iconUrl: string | null,
   ) {
-    const client = await db.connect();
+    const client = await this.db.connect();
     try {
       await client.query('BEGIN');
       const result = await client.query(
@@ -41,7 +46,7 @@ export class CommunitiesRepository {
   }
 
   async findAll(): Promise<Community[]> {
-    const result = await db.query<Community>(
+    const result = await this.db.query<Community>(
       'SELECT id, name, description, icon_url FROM communities ORDER BY created_at DESC',
     );
 
@@ -49,7 +54,7 @@ export class CommunitiesRepository {
   }
 
   async findOne(id: string): Promise<Community | undefined> {
-    const result = await db.query<Community>(
+    const result = await this.db.query<Community>(
       'SELECT id, name, description, banner_url, icon_url, created_at FROM communities WHERE id = $1',
       [id],
     );
@@ -58,7 +63,7 @@ export class CommunitiesRepository {
   }
 
   async findMember(communityId: string, userId: string): Promise<boolean> {
-    const result = await db.query(
+    const result = await this.db.query(
       `
 				SELECT 1
 				FROM community_members
@@ -71,7 +76,7 @@ export class CommunitiesRepository {
   }
 
   async addMember(userId: string, communityId: string): Promise<void> {
-    await db.query(
+    await this.db.query(
       `
 				INSERT INTO community_members (
 					user_id,
@@ -86,7 +91,7 @@ export class CommunitiesRepository {
   }
 
   async removeMember(userId: string, communityId: string): Promise<void> {
-    await db.query(
+    await this.db.query(
       `
 				DELETE FROM community_members
 				WHERE community_id = $1 AND user_id = $2

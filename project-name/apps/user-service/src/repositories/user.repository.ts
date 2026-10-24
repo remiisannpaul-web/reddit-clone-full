@@ -1,10 +1,15 @@
-import { Injectable } from '@nestjs/common';
-import { db } from '../../../../lib/db';
+import { Inject, Injectable } from '@nestjs/common';
+import {
+  DATABASE_POOL,
+  type DatabasePool,
+} from '../../../../lib/database/database.module';
 
 @Injectable()
 export class UserRepository {
+  constructor(@Inject(DATABASE_POOL) private readonly db: DatabasePool) {}
+
   async findOne(id: string) {
-    const result = await db.query(
+    const result = await this.db.query(
       'SELECT id, name, email, image, display_name, bio, karma FROM "user" WHERE id = $1',
       [id],
     );
@@ -12,7 +17,7 @@ export class UserRepository {
   }
 
   async updateName(newName: string, userId: string): Promise<number> {
-    const result = await db.query(
+    const result = await this.db.query(
       `
         UPDATE "user"
         SET name = $1
@@ -28,7 +33,7 @@ export class UserRepository {
     newDisplayName: string,
     userId: string,
   ): Promise<number> {
-    const result = await db.query(
+    const result = await this.db.query(
       `
         UPDATE "user"
         SET display_name = $1

@@ -3,6 +3,7 @@ import { ContentServiceModule } from './content-service.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(ContentServiceModule);
+  app.enableShutdownHooks();
   await app.listen(process.env.CONTENT_SERVICE_PORT ?? 3005);
 }
 

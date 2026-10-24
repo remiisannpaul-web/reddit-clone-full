@@ -1,18 +1,14 @@
-jest.mock('../../../lib/db', () => ({
-  db: { query: jest.fn() },
-}));
-
 import { ForbiddenException, NotFoundException } from '@nestjs/common';
-import { db } from '../../../lib/db';
+import type { DatabasePool } from '../../../lib/database/database.module';
 import { CommunityMembersService } from './community-members.service';
 
 describe('CommunityMembersService', () => {
   let service: CommunityMembersService;
-  const query = jest.mocked(db.query);
+  const query = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
-    service = new CommunityMembersService();
+    service = new CommunityMembersService({ query } as unknown as DatabasePool);
   });
 
   it('returns null for an anonymous role lookup without querying the database', async () => {

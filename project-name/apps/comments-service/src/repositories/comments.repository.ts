@@ -1,5 +1,8 @@
-import { Injectable } from '@nestjs/common';
-import { db } from '../../../../lib/db';
+import { Inject, Injectable } from '@nestjs/common';
+import {
+  DATABASE_POOL,
+  type DatabasePool,
+} from '../../../../lib/database/database.module';
 
 type CommentDeletionRow = {
   author_id: string;
@@ -8,8 +11,10 @@ type CommentDeletionRow = {
 
 @Injectable()
 export class CommentsRepository {
+  constructor(@Inject(DATABASE_POOL) private readonly db: DatabasePool) {}
+
   async forPost(userId: string, postId: string) {
-    const result = await db.query(
+    const result = await this.db.query(
       `SELECT c.id, c.content, c.created_at, c.author_id, c.post_id, u.name,
       EXISTS (SELECT 1 FROM comment_likes WHERE comment_id = c.id AND user_id = $1) AS liked_comment
       FROM comments c JOIN "user" u ON c.author_id = u.id WHERE c.post_id = $2 ORDER BY c.created_at ASC`,
@@ -19,7 +24,7 @@ export class CommentsRepository {
   }
 
   async create(userId: string, postId: string, content: string) {
-    await db.query(
+    await this.db.query(
       'INSERT INTO comments (content, author_id, post_id) VALUES ($1,$2,$3)',
       [content, userId, postId],
     );
@@ -29,7 +34,7 @@ export class CommentsRepository {
     commentId: string,
     postId: string,
   ): Promise<CommentDeletionRow | undefined> {
-    const result = await db.query<CommentDeletionRow>(
+    const result = await this.db.query<CommentDeletionRow>(
       `
         SELECT c.author_id, p.community_id
         FROM comments c
@@ -43,14 +48,14 @@ export class CommentsRepository {
   }
 
   async deleteComment(commentId: string): Promise<number> {
-    const result = await db.query('DELETE FROM comments WHERE id = $1', [
+    const result = await this.db.query('DELETE FROM comments WHERE id = $1', [
       commentId,
     ]);
     return result.rowCount ?? 0;
   }
 
   async countLikes(commentId: string): Promise<string> {
-    const result = await db.query<{ count: string }>(
+    const result = await this.db.query<{ count: string }>(
       'SELECT COUNT(*) FROM comment_likes WHERE comment_id = $1',
       [commentId],
     );
@@ -59,7 +64,7 @@ export class CommentsRepository {
   }
 
   async addLike(userId: string, commentId: string): Promise<number> {
-    const result = await db.query(
+    const result = await this.db.query(
       `
         INSERT INTO comment_likes (user_id, comment_id)
         VALUES ($1, $2)
@@ -72,7 +77,7 @@ export class CommentsRepository {
   }
 
   async removeLike(userId: string, commentId: string): Promise<number> {
-    const result = await db.query(
+    const result = await this.db.query(
       `
         DELETE FROM comment_likes
         WHERE user_id = $1 AND comment_id = $2

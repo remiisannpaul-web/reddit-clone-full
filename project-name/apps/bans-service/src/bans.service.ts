@@ -1,9 +1,13 @@
 import {
+  Inject,
   Injectable,
   ForbiddenException,
   BadRequestException,
 } from '@nestjs/common';
-import { db } from '../../../lib/db';
+import {
+  DATABASE_POOL,
+  type DatabasePool,
+} from '../../../lib/database/database.module';
 import { CommunityMembersService } from '../../community-members/src/community-members.service';
 import { optionalText } from '../../../lib/validation';
 
@@ -21,7 +25,10 @@ type BanRow = {
 
 @Injectable()
 export class BansService {
-  constructor(private readonly members: CommunityMembersService) {}
+  constructor(
+    private readonly members: CommunityMembersService,
+    @Inject(DATABASE_POOL) private readonly db: DatabasePool,
+  ) {}
 
   readonly PERMISSION_COLUMNS: Record<BanPermission, BanPermissionColumn> = {
     post: 'can_post',
@@ -60,7 +67,7 @@ export class BansService {
     userId: string,
     communityId: string,
   ): Promise<BanRow | null> {
-    const result = await db.query<BanRow>(
+    const result = await this.db.query<BanRow>(
       `
         SELECT can_post, can_comment, can_vote, can_view, reason, expires_at
         FROM banned_users
@@ -74,7 +81,7 @@ export class BansService {
   }
 
   async getCommunityIdForPost(postId: string) {
-    const result = await db.query(
+    const result = await this.db.query(
       'SELECT community_id FROM posts WHERE id = $1',
       [postId],
     );
@@ -82,7 +89,7 @@ export class BansService {
   }
 
   async getCommunityIdForComment(commentId: string) {
-    const result = await db.query(
+    const result = await this.db.query(
       'SELECT p.community_id FROM comments c JOIN posts p ON p.id = c.post_id WHERE c.id = $1',
       [commentId],
     );
@@ -105,7 +112,7 @@ export class BansService {
     const expiresAt = optionalText(body.expires_at, 'expiration');
     if (expiresAt && !Number.isFinite(Date.parse(expiresAt)))
       throw new BadRequestException('Invalid expiration');
-    await db.query(
+    await this.db.query(
       `INSERT INTO banned_users (user_id, community_id, can_post, can_comment, can_vote, can_view, expires_at, banned_by, reason)
       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
       ON CONFLICT (user_id, community_id) DO UPDATE SET
@@ -129,7 +136,7 @@ export class BansService {
 
   async remove(actorId: string, userId: string, communityId: string) {
     await this.members.requireOwner(actorId, communityId);
-    await db.query(
+    await this.db.query(
       'DELETE FROM banned_users WHERE user_id = $1 AND community_id = $2',
       [userId, communityId],
     );

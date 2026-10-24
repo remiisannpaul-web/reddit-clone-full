@@ -1,15 +1,21 @@
 import {
+  Inject,
   ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { db } from '../../../lib/db';
+import {
+  DATABASE_POOL,
+  type DatabasePool,
+} from '../../../lib/database/database.module';
 
 @Injectable()
 export class CommunityMembersService {
+  constructor(@Inject(DATABASE_POOL) private readonly db: DatabasePool) {}
+
   async getRole(userId: string | null, communityId: string) {
     if (!userId) return null;
-    const result = await db.query(
+    const result = await this.db.query(
       'SELECT role FROM community_members WHERE community_id = $1 AND user_id = $2',
       [communityId, userId],
     );
@@ -22,7 +28,7 @@ export class CommunityMembersService {
   }
 
   async getOwner(communityId: string) {
-    const result = await db.query(
+    const result = await this.db.query(
       "SELECT user_id FROM community_members WHERE community_id = $1 AND role = 'Owner'",
       [communityId],
     );
@@ -31,7 +37,7 @@ export class CommunityMembersService {
 
   async list(communityId: string, actorId: string) {
     await this.requireOwner(actorId, communityId);
-    const result = await db.query(
+    const result = await this.db.query(
       `
       SELECT u.id, u.name, c.role,
         b.can_post AS ban_can_post, b.can_comment AS ban_can_comment,
@@ -48,7 +54,7 @@ export class CommunityMembersService {
 
   async removeMember(actorId: string, userId: string, communityId: string) {
     await this.requireOwner(actorId, communityId);
-    const result = await db.query(
+    const result = await this.db.query(
       "DELETE FROM community_members WHERE user_id = $1 AND community_id = $2 AND role = 'Member'",
       [userId, communityId],
     );
@@ -63,7 +69,7 @@ export class CommunityMembersService {
     promote: boolean,
   ) {
     await this.requireOwner(actorId, communityId);
-    const result = await db.query(
+    const result = await this.db.query(
       'UPDATE community_members SET role = $3 WHERE user_id = $1 AND community_id = $2 AND role = $4',
       [
         userId,

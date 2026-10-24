@@ -1,10 +1,6 @@
-jest.mock('../../../lib/db', () => ({
-  db: { query: jest.fn() },
-}));
-
 import { ForbiddenException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { db } from '../../../lib/db';
+import { DATABASE_POOL } from '../../../lib/database/database.module';
 import { CommunityMembersService } from '../../community-members/src/community-members.service';
 import { BansService } from './bans.service';
 
@@ -14,7 +10,7 @@ describe('BansService', () => {
     requireOwner: jest.fn(),
     getRole: jest.fn(),
   };
-  const query = jest.mocked(db.query);
+  const query = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -24,6 +20,7 @@ describe('BansService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         BansService,
+        { provide: DATABASE_POOL, useValue: { query } },
         { provide: CommunityMembersService, useValue: members },
       ],
     }).compile();

@@ -61,8 +61,22 @@ allows regular SQL joins and transactions across the grouped features, but it
 is still one shared database, not one database per domain. Existing process
 environment variables take precedence over values loaded from env files.
 
+Each domain application's root module imports the global `DatabaseModule` once.
+Services and repositories inject `DATABASE_POOL` and import the `DatabasePool`
+type from `lib/database/database.module.ts`. Feature modules do not import
+`DatabaseModule`. The provider uses the shared pool from `lib/db.ts`, so services,
+repositories, backend Better Auth, and legacy database helpers use the same pool
+within each process. The pool closes on application shutdown.
+
+`DB_POOL_MAX` caps the shared pool's connections per process (default: `10`, must
+be a positive integer). Idle connections close after 30 seconds, and acquiring a
+connection times out after 5 seconds. All services use the same `DATABASE_URL`.
+Separate application processes and replicas each have their own pool connected
+to that database, so budget the total across processes.
+
 ```dotenv
 DATABASE_URL=postgresql://USER:PASSWORD@localhost:5432/reddit
+DB_POOL_MAX=10
 BETTER_AUTH_SECRET=YOUR_EXISTING_SHARED_SECRET
 BETTER_AUTH_URL=http://localhost:3000
 REDIS_URL=redis://localhost:6379
