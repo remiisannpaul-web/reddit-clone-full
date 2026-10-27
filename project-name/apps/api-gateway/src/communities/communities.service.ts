@@ -32,10 +32,10 @@ export class CommunitiesClient {
     ).then(({ data }) => data);
   }
 
-  findAll() {
-    return firstValueFrom(this.http.get(`${this.baseUrl}/communities`)).then(
-      ({ data }) => data,
-    );
+  findAll(req?: SessionRequest) {
+    return firstValueFrom(
+      this.http.get(`${this.baseUrl}/communities`, this.sessionHeaders(req)),
+    ).then(({ data }) => data);
   }
 
   findOne(id: string, req?: SessionRequest) {

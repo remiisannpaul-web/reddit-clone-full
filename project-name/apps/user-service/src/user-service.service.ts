@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserServiceDto } from './dto/create-user-service.dto';
 import { UpdateUserServiceDto } from './dto/update-user-service.dto';
 import { UserRepository } from './repositories/user.repository';
@@ -8,52 +8,24 @@ export class UserServiceService {
   constructor(private readonly userRepository: UserRepository) {}
 
   public async modifyName(newName: string, userId: string) {
-    try {
-      const updatedRows = await this.userRepository.updateName(newName, userId);
-
-      if (updatedRows === 0) {
-        return {
-          success: false,
-          message: 'User not found',
-        };
-      }
-
-      return {
-        success: true,
-        message: 'Name updated',
-      };
-    } catch (error) {
-      return {
-        success: false,
-        message: 'Database error',
-      };
+    const updatedRows = await this.userRepository.updateName(newName, userId);
+    if (updatedRows === 0) {
+      throw new NotFoundException('User not found');
     }
+
+    return { success: true, message: 'Name updated' };
   }
 
   public async modifyDisplayName(newDisplayName: string, userId: string) {
-    try {
-      const updatedRows = await this.userRepository.updateDisplayName(
-        newDisplayName,
-        userId,
-      );
-
-      if (updatedRows === 0) {
-        return {
-          success: false,
-          message: 'User not found',
-        };
-      }
-
-      return {
-        success: true,
-        message: 'Display name updated',
-      };
-    } catch {
-      return {
-        success: false,
-        message: 'Database error',
-      };
+    const updatedRows = await this.userRepository.updateDisplayName(
+      newDisplayName,
+      userId,
+    );
+    if (updatedRows === 0) {
+      throw new NotFoundException('User not found');
     }
+
+    return { success: true, message: 'Display name updated' };
   }
 
   create(_createUserServiceDto: CreateUserServiceDto) {

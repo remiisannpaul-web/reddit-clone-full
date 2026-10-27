@@ -1,6 +1,7 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
+import type { AuthenticatedRequest } from '../../../../auth.guard';
 
 @Injectable()
 export class UsersClient {
@@ -9,24 +10,34 @@ export class UsersClient {
 
   constructor(private readonly http: HttpService) {}
 
-  findOne(id: string) {
-    return firstValueFrom(this.http.get(`${this.baseUrl}/users/${id}`)).then(
-      ({ data }) => data,
-    );
+  private sessionHeaders(req: AuthenticatedRequest) {
+    const cookie = req.headers?.cookie;
+    return cookie ? { headers: { Cookie: cookie } } : {};
   }
 
-  modifyName(newName: string, userId: string) {
+  findOne(id: string, req: AuthenticatedRequest) {
     return firstValueFrom(
-      this.http.patch(`${this.baseUrl}/users/${userId}`, { newName, userId }),
+      this.http.get(`${this.baseUrl}/users/${id}`, this.sessionHeaders(req)),
     ).then(({ data }) => data);
   }
 
-  modifyDisplayName(newDisplayName: string, userId: string) {
+  modifyName(newName: string, req: AuthenticatedRequest) {
     return firstValueFrom(
-      this.http.patch(`${this.baseUrl}/users/${userId}/display-name`, {
-        newDisplayName,
-        userId,
-      }),
+      this.http.patch(
+        `${this.baseUrl}/users/${req.user.id}`,
+        { newName },
+        this.sessionHeaders(req),
+      ),
+    ).then(({ data }) => data);
+  }
+
+  modifyDisplayName(newDisplayName: string, req: AuthenticatedRequest) {
+    return firstValueFrom(
+      this.http.patch(
+        `${this.baseUrl}/users/${req.user.id}/display-name`,
+        { newDisplayName },
+        this.sessionHeaders(req),
+      ),
     ).then(({ data }) => data);
   }
 }

@@ -26,7 +26,7 @@ export class UsersController {
   @Get(':id')
   findOne(@Param('id') id: string, @Req() req: AuthenticatedRequest) {
     this.requireSelf(req, id);
-    return this.usersClient.findOne(id);
+    return this.usersClient.findOne(id, req);
   }
 
   @Patch(':id')
@@ -38,7 +38,7 @@ export class UsersController {
     this.requireSelf(req, id);
     return this.usersClient.modifyName(
       requiredText(body.newName, 'name', 100),
-      req.user.id,
+      req,
     );
   }
 
@@ -51,7 +51,7 @@ export class UsersController {
     this.requireSelf(req, id);
     return this.usersClient.modifyDisplayName(
       requiredText(body.newDisplayName, 'display name', 100),
-      req.user.id,
+      req,
     );
   }
 }

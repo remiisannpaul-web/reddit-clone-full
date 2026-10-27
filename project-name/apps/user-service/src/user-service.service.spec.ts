@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { NotFoundException } from '@nestjs/common';
 import { UserRepository } from './repositories/user.repository';
 import { UserServiceService } from './user-service.service';
 
@@ -33,19 +34,9 @@ describe('UserServiceService', () => {
   it('reports when a name update finds no user', async () => {
     repository.updateName.mockResolvedValue(0);
 
-    await expect(service.modifyName('New name', 'missing')).resolves.toEqual({
-      success: false,
-      message: 'User not found',
-    });
-  });
-
-  it('returns an explicit error result when the name update fails', async () => {
-    repository.updateName.mockRejectedValue(new Error('database unavailable'));
-
-    await expect(service.modifyName('New name', 'user-1')).resolves.toEqual({
-      success: false,
-      message: 'Database error',
-    });
+    await expect(service.modifyName('New name', 'missing')).rejects.toThrow(
+      NotFoundException,
+    );
   });
 
   it('updates a display name and passes through user-not-found results', async () => {
@@ -56,7 +47,7 @@ describe('UserServiceService', () => {
     ).resolves.toEqual({ success: true, message: 'Display name updated' });
     await expect(
       service.modifyDisplayName('Display name', 'missing'),
-    ).resolves.toEqual({ success: false, message: 'User not found' });
+    ).rejects.toThrow(NotFoundException);
   });
 
   it('delegates user lookup to the repository', async () => {

@@ -31,8 +31,8 @@ export class CommunitiesController {
   }
 
   @Get()
-  findAll() {
-    return this.communitiesClient.findAll();
+  findAll(@Req() req: SessionRequest) {
+    return this.communitiesClient.findAll(req);
   }
 
   @Get(':id')
